@@ -15,37 +15,37 @@ const io = new Server(server, {
 
 app.use(cors());
 
-app.get('/get_check',(req,res)=>{
-    console.log("Server is running on port 3000");
-    res.send("Server is running");
-})
+app.get('/get_check', (req, res) => {
+  console.log("Server is running on port 3000");
+  res.send("Server is running");
+});
 
 // Store users
-const users = {}; // { username: socket.id }
-const socketToUser = {}; // { socket.id: username }
+const users = {};           // { username: socketId }
+const socketToUser = {};    // { socketId: username }
 
 io.on('connection', (socket) => {
   console.log(`Socket connected: ${socket.id}`);
 
-  // Login handler
+  // Handle user login
   socket.on('login', (username) => {
     users[username] = socket.id;
     socketToUser[socket.id] = username;
     console.log(`${username} logged in`);
 
-    // Send updated user list to everyone
+    // Broadcast online users
     io.emit('users_online', Object.keys(users));
   });
 
-  // Handle private message
+  // Handle private message sending
   socket.on('send_private_message', ({ to, from, message }) => {
     const targetSocketId = users[to];
     if (targetSocketId) {
-      io.to(targetSocketId).emit('private_message', { from, message });
+      io.to(targetSocketId).emit('private_message', { from, to, message }); // include 'to' for frontend tracking
     }
   });
 
-  // On disconnect
+  // Handle disconnect
   socket.on('disconnect', () => {
     const username = socketToUser[socket.id];
     if (username) {
