@@ -15,6 +15,11 @@ const io = new Server(server, {
 
 app.use(cors());
 
+app.get('/get_check',(req,res)=>{
+    console.log("Server is running on port 3000");
+    res.send("Server is running");
+})
+
 // Store users
 const users = {}; // { username: socket.id }
 const socketToUser = {}; // { socket.id: username }
